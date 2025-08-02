@@ -5,6 +5,6 @@ var bodyParser = require("body-parser");// call body parser module and make use 
 router.use(bodyParser.urlencoded({extended:true}));
 
 router.use(require('./controller/staticpages'))
-//router.use(require('./controller/formcontroller'))
+router.use(require('./controller/formcontroller'))
 
 module.exports = router;

@@ -54,6 +54,68 @@
 
 })(jQuery);
 
+// Contact Form Handling
+document.addEventListener('DOMContentLoaded', function() {
+	const form = document.getElementById('contact-form');
+	const messageDiv = document.getElementById('form-message');
+	const submitBtn = document.getElementById('submit-btn');
+
+	if (form) {
+		form.addEventListener('submit', async function(e) {
+			e.preventDefault();
+			
+			// Show loading state
+			const originalText = submitBtn.value;
+			submitBtn.value = 'Sending...';
+			submitBtn.disabled = true;
+			messageDiv.style.display = 'none';
+
+			try {
+				const formData = new FormData(form);
+				const response = await fetch('/contact', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: new URLSearchParams(formData)
+				});
+
+				const result = await response.json();
+
+				// Show message
+				messageDiv.style.display = 'block';
+				messageDiv.innerHTML = result.message;
+				
+				if (result.success) {
+					messageDiv.style.backgroundColor = '#d4edda';
+					messageDiv.style.color = '#155724';
+					messageDiv.style.borderColor = '#c3e6cb';
+					form.reset(); // Clear form on success
+				} else {
+					messageDiv.style.backgroundColor = '#f8d7da';
+					messageDiv.style.color = '#721c24';
+					messageDiv.style.borderColor = '#f5c6cb';
+				}
+
+				// Scroll to message
+				messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+			} catch (error) {
+				console.error('Form submission error:', error);
+				messageDiv.style.display = 'block';
+				messageDiv.innerHTML = 'An error occurred. Please try again later.';
+				messageDiv.style.backgroundColor = '#f8d7da';
+				messageDiv.style.color = '#721c24';
+				messageDiv.style.borderColor = '#f5c6cb';
+			} finally {
+				// Reset button
+				submitBtn.value = originalText;
+				submitBtn.disabled = false;
+			}
+		});
+	}
+});
+
 // Fallback vanilla JavaScript for read more functionality (outside jQuery wrapper)
 document.addEventListener('DOMContentLoaded', function() {
 	console.log('DOM Content Loaded - Setting up vanilla JS event listeners');

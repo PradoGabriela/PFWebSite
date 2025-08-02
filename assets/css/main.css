@@ -1625,6 +1625,7 @@ ul.actions li:first-child {
   color: #fff;
 }
 .wrapper.style4 form input[type=text],
+.wrapper.style4 form input[type=email],
 .wrapper.style4 form input[type=password],
 .wrapper.style4 form select,
 .wrapper.style4 form textarea {
@@ -1632,6 +1633,7 @@ ul.actions li:first-child {
   background: #282828;
 }
 .wrapper.style4 form input[type=text]:focus,
+.wrapper.style4 form input[type=email]:focus,
 .wrapper.style4 form input[type=password]:focus,
 .wrapper.style4 form select:focus,
 .wrapper.style4 form textarea:focus {
@@ -1987,8 +1989,8 @@ body > article {
   background-color: #43B3E0;
   cursor: pointer;
  padding: 0.5em 1.15em 0.5em 1.15em;
-		font-size: 0.8em;
-		max-width: 14em;
+		font-size: 1em;
+		max-width: 10em;
   margin-top: 0.2em;
  
   text-decoration: none;

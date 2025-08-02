@@ -17,6 +17,7 @@ app.use(express.static("components"));
 app.use(express.static("controller"));
 app.use(express.static("assets"));
 app.use(express.static("assets/css"));
+app.use(express.static("assets/js"));
 
 
 app.use(require('./routes.js'));
