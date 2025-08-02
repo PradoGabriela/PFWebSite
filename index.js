@@ -7,6 +7,9 @@ require('dotenv').config();
 
 const app = express();
 
+// Trust proxy - IMPORTANT for CloudPanel/reverse proxy setups
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -22,27 +25,37 @@ app.use(helmet({
   }
 }));
 
-// Rate limiting
+// Rate limiting with proxy-friendly configuration
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000, // Increased from 100 to 1000 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  // Skip rate limiting validation for proxy headers
+  skip: (req, res) => false,
+  keyGenerator: (req, res) => {
+    // Use the real IP or fallback to remote address
+    return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+  }
 });
 app.use(limiter);
 
-// Contact form specific rate limiting
+// Contact form specific rate limiting with proxy-friendly configuration
 const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // Increased from 5 to 10 contact form submissions per hour
-  message: 'Too many contact form submissions, please try again later.'
+  message: 'Too many contact form submissions, please try again later.',
+  keyGenerator: (req, res) => {
+    // Use the real IP or fallback to remote address
+    return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
+  }
 });
 
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.com'] // Replace with your actual domain
+    ? ['https://pradogabriela.dev', 'https://www.pradogabriela.dev'] // Your actual domain
     : ['http://localhost:3000', 'http://127.0.0.1:3000']
 }));
 
@@ -65,6 +78,17 @@ app.use(express.static("assets/js"));
 
 
 app.use(require('./routes.js'));
+
+// SEO routes
+app.get('/sitemap.xml', (req, res) => {
+    res.type('application/xml');
+    res.sendFile(path.join(__dirname, 'public', 'sitemap.xml'));
+});
+
+app.get('/robots.txt', (req, res) => {
+    res.type('text/plain');
+    res.sendFile(path.join(__dirname, 'public', 'robots.txt'));
+});
 
 // Apply contact rate limiting to contact route
 app.use('/contact', contactLimiter);

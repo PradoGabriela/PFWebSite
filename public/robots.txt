@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://pradogabriela.dev/sitemap.xml
+
+# Block access to sensitive areas
+Disallow: /node_modules/
+Disallow: /controller/
+Disallow: /partials/
+Disallow: /views/
+Disallow: /.env
+Disallow: /package.json
+Disallow: /package-lock.json
