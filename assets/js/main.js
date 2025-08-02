@@ -31,27 +31,6 @@
 			offset: function() { return $nav.height(); }
 		});
 
-	// Expandable text functionality
-		$(document).on('click', '.read-more-btn', function() {
-			console.log('jQuery: Read more button clicked'); // Debug log
-			var $btn = $(this);
-			var $container = $btn.closest('.description-container');
-			var $text = $container.find('.description-text');
-			
-			console.log('jQuery Button:', $btn); // Debug log
-			console.log('jQuery Text element:', $text); // Debug log
-			
-			if ($text.hasClass('expanded')) {
-				$text.removeClass('expanded');
-				$btn.text('Read More');
-				console.log('jQuery: Collapsed text'); // Debug log
-			} else {
-				$text.addClass('expanded');
-				$btn.text('Read Less');
-				console.log('jQuery: Expanded text'); // Debug log
-			}
-		});
-
 })(jQuery);
 
 // Contact Form Handling
@@ -116,70 +95,98 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 });
 
-// Fallback vanilla JavaScript for read more functionality (outside jQuery wrapper)
+// Read More functionality
 document.addEventListener('DOMContentLoaded', function() {
-	console.log('DOM Content Loaded - Setting up vanilla JS event listeners');
-	console.log('jQuery available:', typeof $ !== 'undefined');
+	console.log('DOM Content Loaded - Setting up read more functionality');
 	console.log('Number of read-more buttons found:', document.querySelectorAll('.read-more-btn').length);
 	console.log('Number of description containers found:', document.querySelectorAll('.description-container').length);
 	
+	// Add event listeners to all read more buttons
 	document.addEventListener('click', function(e) {
-		console.log('Click detected on:', e.target);
 		if (e.target.classList.contains('read-more-btn')) {
-			console.log('Vanilla JS: Read more button clicked');
-			const btn = e.target;
-			const container = btn.closest('.description-container');
-			const text = container ? container.querySelector('.description-text') : null;
+			console.log('Read more button clicked');
 			
-			console.log('Vanilla JS Button:', btn);
-			console.log('Vanilla JS Container:', container);
-			console.log('Vanilla JS Text element:', text);
-			
-			if (!container) {
-				console.error('Container not found!');
-				return;
-			}
-			
-			if (!text) {
-				console.error('Text element not found!');
-				return;
-			}
-			
-			if (text.classList.contains('expanded')) {
-				text.classList.remove('expanded');
-				btn.textContent = 'Read More';
-				console.log('Vanilla JS: Collapsed text');
-			} else {
-				text.classList.add('expanded');
-				btn.textContent = 'Read Less';
-				console.log('Vanilla JS: Expanded text');
+			try {
+				const btn = e.target;
+				const container = btn.closest('.description-container');
+				const text = container ? container.querySelector('.description-text') : null;
+				
+				console.log('Button:', btn);
+				console.log('Container:', container);
+				console.log('Text element:', text);
+				
+				if (!container || !text) {
+					console.error('Could not find required elements');
+					console.error('Container found:', !!container);
+					console.error('Text found:', !!text);
+					return;
+				}
+				
+				// Toggle the expanded class
+				const parentBox = text.closest('.box.style2');
+				
+				if (text.classList.contains('expanded')) {
+					text.classList.remove('expanded');
+					if (parentBox) parentBox.classList.remove('expanded-content');
+					btn.textContent = 'Read More';
+					console.log('Collapsed text - removed expanded class');
+					
+					// Smooth scroll to button after collapse
+					setTimeout(() => {
+						btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+					}, 300);
+				} else {
+					text.classList.add('expanded');
+					if (parentBox) parentBox.classList.add('expanded-content');
+					btn.textContent = 'Read Less';
+					console.log('Expanded text - added expanded class');
+					
+					// Small delay to let expansion start, then scroll to show full content
+					setTimeout(() => {
+						const rect = container.getBoundingClientRect();
+						const isVisible = rect.bottom <= window.innerHeight;
+						if (!isVisible) {
+							container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+						}
+					}, 100);
+				}
+				
+				// Log current classes and computed styles for debugging
+				console.log('Current text classes:', text.className);
+				console.log('Computed max-height:', window.getComputedStyle(text).maxHeight);
+				
+			} catch (error) {
+				console.error('Error in read more functionality:', error);
 			}
 		}
 	});
 });
 
-// Global function for inline onclick (backup method)
+// Global function for backward compatibility (if needed)
 function toggleReadMore(btn) {
-	console.log('toggleReadMore function called');
-	const container = btn.closest('.description-container');
-	const text = container ? container.querySelector('.description-text') : null;
+	console.log('toggleReadMore function called (deprecated - use event listeners instead)');
 	
-	console.log('Button:', btn);
-	console.log('Container:', container);
-	console.log('Text element:', text);
-	
-	if (!container || !text) {
-		console.error('Could not find required elements');
-		return;
-	}
-	
-	if (text.classList.contains('expanded')) {
-		text.classList.remove('expanded');
-		btn.textContent = 'Read More';
-		console.log('Collapsed text');
-	} else {
-		text.classList.add('expanded');
-		btn.textContent = 'Read Less';
-		console.log('Expanded text');
+	try {
+		const container = btn.closest('.description-container');
+		const text = container ? container.querySelector('.description-text') : null;
+		const parentBox = text ? text.closest('.box.style2') : null;
+		
+		if (!container || !text) {
+			console.error('Could not find required elements');
+			return;
+		}
+		
+		if (text.classList.contains('expanded')) {
+			text.classList.remove('expanded');
+			if (parentBox) parentBox.classList.remove('expanded-content');
+			btn.textContent = 'Read More';
+		} else {
+			text.classList.add('expanded');
+			if (parentBox) parentBox.classList.add('expanded-content');
+			btn.textContent = 'Read Less';
+		}
+		
+	} catch (error) {
+		console.error('Error in toggleReadMore:', error);
 	}
 }

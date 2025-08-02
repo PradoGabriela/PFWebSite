@@ -1,10 +1,54 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
+
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
+      scriptSrc: ["'self'", "'unsafe-inline'"], // Allow inline scripts for functionality
+      scriptSrcAttr: ["'unsafe-inline'"], // Allow inline event handlers if needed
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"]
+    }
+  }
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Increased from 100 to 1000 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
+// Contact form specific rate limiting
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Increased from 5 to 10 contact form submissions per hour
+  message: 'Too many contact form submissions, please try again later.'
+});
+
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-domain.com'] // Replace with your actual domain
+    : ['http://localhost:3000', 'http://127.0.0.1:3000']
+}));
+
 app.set('view engine', 'ejs'); // Set the template engine
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json()); // For JSON payloads
 
 const path = require('path');
 
@@ -21,6 +65,9 @@ app.use(express.static("assets/js"));
 
 
 app.use(require('./routes.js'));
+
+// Apply contact rate limiting to contact route
+app.use('/contact', contactLimiter);
 
 
 // Handling 404 errors

@@ -13,7 +13,7 @@ const pool = mysql.createPool({
      ssl: {
         // For most providers, this is enough:
         //TODO fix
-        rejectUnauthorized: false
+        rejectUnauthorized: false, // Set to true if you have a valid SSL certificate
         // For some, you may need to provide CA certs, etc.
     }
 

@@ -1974,12 +1974,15 @@ body > article {
 .description-text.expandable {
   max-height: 4.5em; /* Approximately 3 lines */
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s ease-out;
   line-height: 1.5;
+  position: relative;
 }
 
 .description-text.expandable.expanded {
-  max-height: none;
+  max-height: 500px; /* Increased from 200px to handle longer text */
+  overflow: visible;
+  transition: max-height 0.4s ease-out; /* Use same easing for consistency */
 }
 
 .read-more-btn {
@@ -1988,22 +1991,44 @@ body > article {
   color: #fff;
   background-color: #43B3E0;
   cursor: pointer;
- padding: 0.5em 1.15em 0.5em 1.15em;
-		font-size: 1em;
-		max-width: 10em;
-  margin-top: 0.2em;
- 
+  padding: 0.5em 1.15em 0.5em 1.15em;
+  font-size: 1em;
+  max-width: 10em;
+  margin-top: 0.5em;
+  border-radius: 5px;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .read-more-btn:hover {
-  color: #2e8aa6;
+  background-color: #2e8aa6;
+  transform: translateY(-1px);
 }
 
 .read-more-btn:focus {
   outline: 2px solid #3a9fbf;
   outline-offset: 2px;
+}
+
+/* Ensure box style2 accommodates expanding content */
+.box.style2 {
+  overflow: visible; /* Allow content to expand outside initial box bounds */
+  transition: all 0.4s ease-out; /* Transition all properties including height, padding */
+  min-height: auto; /* Allow natural height expansion */
+}
+
+.box.style2 .description-container {
+  margin-top: 1em;
+}
+
+/* Add specific styling for expanded state */
+.box.style2:has(.description-text.expanded) {
+  padding-bottom: 3em; /* Add extra padding when expanded to accommodate content */
+}
+
+/* Fallback for browsers that don't support :has() */
+.box.style2.expanded-content {
+  padding-bottom: 3em;
 }
 
 /*# sourceMappingURL=main.css.map */
