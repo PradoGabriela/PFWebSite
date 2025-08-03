@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit'); 
 const cors = require('cors');
 require('dotenv').config();
 
@@ -32,12 +32,8 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  // Skip rate limiting validation for proxy headers
-  skip: (req, res) => false,
-  keyGenerator: (req, res) => {
-    // Use the real IP or fallback to remote address
-    return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
-  }
+
+    keyGenerator: (req, res) => ipKeyGenerator(req.ip)  
 });
 app.use(limiter);
 
@@ -46,10 +42,7 @@ const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // Increased from 5 to 10 contact form submissions per hour
   message: 'Too many contact form submissions, please try again later.',
-  keyGenerator: (req, res) => {
-    // Use the real IP or fallback to remote address
-    return req.ip || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown';
-  }
+    keyGenerator: (req, res) => ipKeyGenerator(req.ip)  
 });
 
 // CORS configuration
@@ -97,9 +90,7 @@ app.use('/contact', contactLimiter);
 // Handling 404 errors
 app.use((req, res, next) => {
     res.status(404);
-    res.redirect('/error'); // Render a specific 404 page
-    // or
-    // res.json({ error: 'Not Found' }); // Send a JSON response
+     res.json({ error: 'Not Found' }); // Send a JSON response
   });
 
 
@@ -107,9 +98,7 @@ app.use((req, res, next) => {
   app.use((err, req, res, next) => {
     console.error('Error:', err);
     res.status(500);
-    res.redirect('/servererror'); // Render a general error page
-    // or
-    // res.json({ error: 'Internal Server Error' }); // Send a JSON response
+    res.json({ error: 'Internal Server Error' }); // Send a JSON response
   });
 
 
